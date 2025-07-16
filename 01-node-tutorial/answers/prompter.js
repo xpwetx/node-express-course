@@ -1,64 +1,62 @@
+
 const http = require("http");
-var StringDecoder = require("string_decoder").StringDecoder;
 
-const getBody = (req, callback) => {
-  const decode = new StringDecoder("utf-8");
-  let body = "";
-  req.on("data", function (data) {
-    body += decode.write(data);
-  });
-  req.on("end", function () {
-    body += decode.end();
-    const body1 = decodeURI(body);
-    const bodyArray = body1.split("&");
-    const resultHash = {};
-    bodyArray.forEach((part) => {
-      const partArray = part.split("=");
-      resultHash[partArray[0]] = partArray[1];
-    });
-    callback(resultHash);
-  });
-};
+const secretNumber = Math.floor(Math.random() * 100) + 1;
+let lastMessage = "Guess a number between 1 and 100!";
 
-// here, you could declare one or more variables to store what comes back from the form.
-let item = "Enter something below.";
-
-// here, you can change the form below to modify the input fields and what is displayed.
-// This is just ordinary html with string interpolation.
-const form = () => {
-  return `
+// form
+const getFormHTML = () => `
+<html>
+<head><title>Guess the Number!</title></head>
   <body>
-  <p>${item}</p>
+  <p>${lastMessage}</p>
   <form method="POST">
-  <input name="item"></input>
+  <label for="guess">Your guess: </label>
+  <input type="number" id="guess" name="guess" min="1" max="100" required />
   <button type="submit">Submit</button>
   </form>
   </body>
+  </html>
   `;
-};
 
 const server = http.createServer((req, res) => {
   console.log("req.method is ", req.method);
   console.log("req.url is ", req.url);
-  if (req.method === "POST") {
-    getBody(req, (body) => {
-      console.log("The body of the post is ", body);
-      // here, you can add your own logic
-      if (body["item"]) {
-        item = body["item"];
+
+  if (req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.end(getFormHTML());
+  } else if (req.method === "POST") {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+  
+    req.on("end", () => {
+      const params = new URLSearchParams(body);
+      const guess = parseInt(params.get('guess'), 10);
+
+      if (isNaN(guess)) {
+        lastMessage = "Please enter a valid number.";
+      } else if (guess < secretNumber) {
+        lastMessage = `Your guess of ${guess} is too low!`;
+      } else if (guess > secretNumber) {
+        lastMessage = `Your guess of ${guess} is too high!`;
       } else {
-        item = "Nothing was entered.";
+        lastMessage = `Correct! The number was ${secretNumber}. Refresh to play again!`;
       }
-      // Your code changes would end here
-      res.writeHead(303, {
-        Location: "/",
-      });
-      res.end();
+
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(formHTML);
     });
   } else {
-    res.end(form());
+    res.writeHead(405, { "Content-Type": "text/plain" });
+    res.end("Method not allowed");
   }
 });
 
-server.listen(3000);
-console.log("The server is listening on port 3000.");
+server.listen(3000, () => {
+  console.log("Server is running at http://localhost:3000");
+});
+
+  
