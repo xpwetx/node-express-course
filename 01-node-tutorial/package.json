@@ -4,7 +4,9 @@
   "description": "",
   "main": "1-intro.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "test": "echo \"Error: no test specified\" && exist 1",
+    "dev": "nodemon prompter.js",
+    "start": "node prompter.js"
   },
   "keywords": [],
   "author": "",
