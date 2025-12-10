@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Week 3 Express</title>
+</head>
+<body>
+  <h1>Welcome to Express Week 3</h1>
+
+  <button id="load">Load Products</button>
+
+  <div id="output"></div>
+
+  <script>
+    document.getElementById("load").addEventListener("click", async () => {
+      const response = await fetch("/api/v1/products");
+      const data = await response.json();
+      
+      document.getElementById("output").innerHTML =
+        "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
+    });
+  </script>
+</body>
+</html>
