@@ -58,13 +58,17 @@ const deletePerson = (req, res) => {
   if (!person) {
     return res
       .status(404)
-      .json({ success: false, message: "Person not found" });
+      .json({ success: false, message: "No person with id ${id}" });
   }
+  if (!name) {
+    return res.status(400).json({ success: false, message: 'Please provide a name' });
+    }
+    person.name = name;
 
   const index = people.indexOf(person);
   people.splice(index, 1);
 
-  res.status(200).json({ success: true, data: people });
+  res.status(200).json({ success: true, data: person });
 };
 
 module.exports = {
